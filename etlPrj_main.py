@@ -16,27 +16,74 @@ import requests
 import bs4
 import urllib.parse
 import re
+import psycopg2
+
+def OpenDBConnection():
+    from sqlalchemy import create_engine    
+    # http://www.postgresqltutorial.com/postgresql-serial/
+    # engine = create_engine("postgresql://postgres:"+password+"@localhost:5432/Jobs")    
+
+    # Connect to the database
+    connection = psycopg2.connect(host='localhost',
+                             port="5432",
+                             user='postgres',
+                             password='magogate',
+                             database='Jobs')
+    return connection
+
+def closeDBConnection(connection):
+    connection.close()
+
+def insertData(connection, jobList):
+    companyname = jobList[0].replace("'","")
+    jobtitle = jobList[1].replace("'","")
+    location = jobList[2].replace("'","")
+    salary = jobList[3]
+    daysofposting = jobList[4].replace("'","")
+
+    cursor = connection.cursor()
+    sql = """
+    insert into GlassdoorJobs(companyname, jobtitle, location, salary, daysofposting)
+    values('{}', '{}', '{}', '{}', '{}')
+    """.format(companyname, jobtitle, location, salary, daysofposting)
+    cursor.execute(sql)
+    connection.commit()
 
 def extractData(url):
+    connection = OpenDBConnection()
     hdr = {'User-Agent': 'Mozilla/5.0'}
     # https://stackoverflow.com/questions/42814637/glassdoor-api-login-not-working-with-python-response-403-bots-not-allowed
     # print(requests.get(str(url).replace(" › ","/Job/"), headers=hdr).text)
     response = requests.get(url, headers=hdr)
     print(response)
     soup = bs4.BeautifulSoup(response.text, "html.parser")
-    headlines = soup.find_all(class_="jobContainer")
+    jobListing = soup.find_all(class_="jobContainer")
 
-    for h in headlines:
+    for job in jobListing:
+        jobList = []
         print("---------------------------------")
-        print((str(h.contents[0]).split('class="jobInfoItem jobEmpolyerName"')[1].split("<")[0]))
-        print((str(h.contents[1]).split('">')[1].split("<")[0]))
-        print((str(h.contents[2]).split("subtle loc")[1].split("<")[0]))
-        if(len((h.contents)) > 3 and "salaryText" in str(h.contents[3])):
-            print((str(h.contents[3]).split("salaryText")[1].split("<")[0]))        
-            print((str(h.contents[3]).split("jobLabels")[1].split('<span class="minor">')[1].split("<")[0]))
+        print((str(job.contents[0]).split('class="jobInfoItem jobEmpolyerName"')[1].split("<")[0]))
+        jobList.append((str(job.contents[0]).split('class="jobInfoItem jobEmpolyerName"')[1].split("<")[0]))
+
+        print((str(job.contents[1]).split('">')[1].split("<")[0]))
+        jobList.append((str(job.contents[1]).split('">')[1].split("<")[0]))
+
+        print((str(job.contents[2]).split("subtle loc")[1].split("<")[0]))
+        jobList.append((str(job.contents[2]).split("subtle loc")[1].split("<")[0]))
+
+        if(len((job.contents)) > 3 and "salaryText" in str(job.contents[3])):
+            print((str(job.contents[3]).split("salaryText")[1].split("<")[0]))     
+            jobList.append((str(job.contents[3]).split("salaryText")[1].split("<")[0]))   
+            print((str(job.contents[3]).split("jobLabels")[1].split('<span class="minor">')[1].split("<")[0]))
+            jobList.append((str(job.contents[3]).split("jobLabels")[1].split('<span class="minor">')[1].split("<")[0]))
         else:
-            print((str(h.contents[2]).split("jobLabels")[1].split('<span class="minor">')[1].split("<")[0]))
+            print((str(job.contents[2]).split("jobLabels")[1].split('<span class="minor">')[1].split("<")[0]))
+            jobList.append(0)
+            jobList.append((str(job.contents[2]).split("jobLabels")[1].split('<span class="minor">')[1].split("<")[0]))
         print("---------------------------------")
+        insertData(connection, jobList)
+
+    closeDBConnection
 
 def formulateURLfromGoogleSearch(baseUrl):
     noOfPagesToExtract = 1
@@ -75,6 +122,7 @@ for city in citiState:
     baseUrl = "https://www.google.com/search?q=glassdoor+jobs+"+searchCityState
     print(baseUrl)
     formulateURLfromGoogleSearch(baseUrl)
+
 
 
     
