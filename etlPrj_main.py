@@ -38,6 +38,28 @@ def extractData(url):
             print((str(h.contents[2]).split("jobLabels")[1].split('<span class="minor">')[1].split("<")[0]))
         print("---------------------------------")
 
+def formulateURLfromGoogleSearch(baseUrl):
+    noOfPagesToExtract = 1
+    response = requests.get(baseUrl)
+    soup = bs4.BeautifulSoup(response.text, "html.parser")
+    # https://stackoverflow.com/questions/8936030/using-beautifulsoup-to-search-html-for-string
+    # https://www.regular-expressions.info/quickstart.html
+    # https://www.crummy.com/software/BeautifulSoup/bs4/doc/
+    # urls = soup.body.find_all(text=re.compile("https://www.glassdoor.com › +[a-zA-Z]+-+jobs"))
+    urls = soup.body.find_all(href=re.compile("https://www.glassdoor.com/"), limit=1)
+
+    # for url in urls:    
+    finalJobURL =str(urls[0]).split("q=")[1].split("&")[0]
+    # Create a URL for first 3 pages
+    for cnt in range(0, noOfPagesToExtract):
+        if(cnt == 0):
+            # print(finalJobURL)
+            extractData(finalJobURL)
+        else:
+            # print(finalJobURL+f"_IP{cnt}.htm")
+            extractData(finalJobURL+f"_IP{cnt}.htm")
+
+
 # base url for google
 # https://www.google.com/search?q=glassdoor+jobs+marietta+ga
 # base url for glassdoor
@@ -46,32 +68,13 @@ def extractData(url):
 # https://www.glassdoor.com/Job/san-jose-jobs-SRCH_IL.0,8_IC1147436_IP2.htm
 # https://www.glassdoor.com/Job/san-jose-jobs-SRCH_IL.0,8_IC1147436_IP3.htm
 
-searchCityState = urllib.parse.quote("marietta")
+citiState = ["marietta-ga", "atlanta-ga", "san jose-ca", "birmingham-al"]
 
-baseUrl = "https://www.google.com/search?q=glassdoor+jobs+"+searchCityState
+for city in citiState:    
+    searchCityState = urllib.parse.quote(city)
+    baseUrl = "https://www.google.com/search?q=glassdoor+jobs+"+searchCityState
+    print(baseUrl)
+    formulateURLfromGoogleSearch(baseUrl)
 
-print(baseUrl)
-response = requests.get(baseUrl)
-soup = bs4.BeautifulSoup(response.text, "html.parser")
-# https://stackoverflow.com/questions/8936030/using-beautifulsoup-to-search-html-for-string
-# https://www.regular-expressions.info/quickstart.html
-# https://www.crummy.com/software/BeautifulSoup/bs4/doc/
-urls = soup.body.find_all(text=re.compile("https://www.glassdoor.com › +[a-zA-Z]+-+jobs"))
 
-for url in urls:    
-    finalJobURL = str(url).replace(" › ","/Job/")
-    # Create a URL for first 3 pages
-    for cnt in range(0,3):
-        if(cnt == 0):
-            # print(finalJobURL)
-            extractData(finalJobURL)
-        else:
-            # print(finalJobURL+f"_IP{cnt}.htm")
-            extractData(finalJobURL+f"_IP{cnt}.htm")
     
-    # first urls for-loop is returning more than one url
-    # however, we need only first seach results, and 
-    # then using which we can do the pagination if needed
-    break
-
-
