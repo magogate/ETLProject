@@ -6,11 +6,14 @@
 #     Preet Puri
 #     Sweta Shekhar
 # Created On: 11/09/2019
+# Updated On: 13/09/2019
 # This program performs following steps in order to pull job information from glassdoor jobsite
-# 1. search glassdoor jobs with city/state name on google first
-# 2. Extract very first glassdoor url from google search 
-# 3. Using glassdoor url, it derives 3 URLs for first 3 pages of glassdoor for respective city/state 
-# 4. Extracts Employer Name, Job Title, Salary and Job Posting Days for first 3 pages using derived URL at Step#3
+# 1. OpenDBConnection creates the connection and returns its object to calling function
+# 2. closeDBConnection closes the connection
+# 3. insertData function accepts 3 parameters
+#       connection object, list - which has actual data, and table name
+# 4. truncateData function accepts 2 parameters
+#       connection object, and table name
 
 import psycopg2
 
@@ -30,7 +33,7 @@ def OpenDBConnection():
 def closeDBConnection(connection):
     connection.close()
 
-def insertData(connection, jobList):
+def insertData(connection, jobList, tableName):
     companyname = jobList[0].replace("'","")
     jobtitle = jobList[1].replace("'","")
     location = jobList[2].replace("'","")
@@ -38,9 +41,15 @@ def insertData(connection, jobList):
     daysofposting = jobList[4].replace("'","")
 
     cursor = connection.cursor()
-    sql = """
-    insert into GlassdoorJobs(companyname, jobtitle, location, salary, daysofposting)
-    values('{}', '{}', '{}', '{}', '{}')
-    """.format(companyname, jobtitle, location, salary, daysofposting)
+    sql = f"""
+    insert into {tableName}(companyname, jobtitle, location, salary, daysofposting)
+    values('{companyname}', '{jobtitle}', '{location}', '{salary}', '{daysofposting}')
+    """
     cursor.execute(sql)
     connection.commit()
+
+def truncateData(connection, tableName):
+    cursor = connection.cursor()
+    cursor.execute(f"truncate table {tableName}")
+    connection.commit()
+    

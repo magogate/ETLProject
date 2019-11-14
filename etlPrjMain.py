@@ -6,15 +6,16 @@
 #     Preet Puri
 #     Sweta Shekhar
 # Created On: 11/09/2019
+# Updated On: 13/09/2019
 # This program performs following steps in order to pull job information from glassdoor jobsite
-# 1. search glassdoor jobs with city/state name on google first
-# 2. Extract very first glassdoor url from google search 
-# 3. Using glassdoor url, it derives 3 URLs for first 3 pages of glassdoor for respective city/state 
-# 4. Extracts Employer Name, Job Title, Salary and Job Posting Days for first 3 pages using derived URL at Step#3
+# 1. based on city and state provided, this program formulates the base url 
+# 2. for glassdoor and monster jobs separately
+# 3. and calls corresponding function for extraction and data load
+
 
 import urllib.parse
 import fetchGlassdoorJobs as glassdoor
-
+import fetchMonstorJobs as monster
 
 # base url for google
 # https://www.google.com/search?q=glassdoor+jobs+marietta+ga
@@ -29,9 +30,18 @@ citiState = ["marietta-ga", "atlanta-ga", "san jose-ca", "birmingham-al"]
 for city in citiState:    
     searchCityState = urllib.parse.quote(city)
     baseUrl = "https://www.google.com/search?q=glassdoor+jobs+"+searchCityState
-    print(baseUrl)
+    # print(baseUrl)
     glassdoor.formulateURLfromGoogleSearch(baseUrl)
 
+print("Glassdoor Process Completed....")
 
-
+for city in citiState:
+    searchCityState = urllib.parse.quote(city)
+    cityName = city.split("-")[0]
+    stateName = city.split("-")[1]
+    baseUrl = f"https://www.monster.com/jobs/l-{cityName}-{stateName}"
+    # print(baseUrl)    
+    monster.formulateURLforPagination(baseUrl)
+    
+print("Monster Process Completed....")
     
