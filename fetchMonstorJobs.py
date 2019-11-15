@@ -48,11 +48,7 @@ def extractData(url):
 
 def formulateURLforPagination(baseUrl):
     noOfPagesToExtract = 2
-
-    conn = dbCon.OpenDBConnection()
-    dbCon.truncateData(conn, "monsterjobs")
-    dbCon.closeDBConnection
-
+    
     # Create a URL for first 3 pages
     # https://www.monster.com/jobs/l-atlanta-ga?page=1
     for cnt in range(1, noOfPagesToExtract+1):

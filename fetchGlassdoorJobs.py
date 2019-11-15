@@ -48,11 +48,7 @@ def extractData(url):
     dbCon.closeDBConnection
 
 def formulateURLfromGoogleSearch(baseUrl):
-    noOfPagesToExtract = 2
-    
-    conn = dbCon.OpenDBConnection()
-    dbCon.truncateData(conn, "glassdoorjobs")
-    dbCon.closeDBConnection
+    noOfPagesToExtract = 2    
 
     response = requests.get(baseUrl)
     soup = bs4.BeautifulSoup(response.text, "html.parser")

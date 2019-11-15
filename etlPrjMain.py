@@ -16,6 +16,7 @@
 import urllib.parse
 import fetchGlassdoorJobs as glassdoor
 import fetchMonstorJobs as monster
+import dbConnection as dbCon
 
 # base url for google
 # https://www.google.com/search?q=glassdoor+jobs+marietta+ga
@@ -27,6 +28,11 @@ import fetchMonstorJobs as monster
 
 citiState = ["marietta-ga", "atlanta-ga", "san jose-ca", "birmingham-al"]
 
+conn = dbCon.OpenDBConnection()
+dbCon.truncateData(conn, "glassdoorjobs")
+dbCon.closeDBConnection
+
+
 for city in citiState:    
     searchCityState = urllib.parse.quote(city)
     baseUrl = "https://www.google.com/search?q=glassdoor+jobs+"+searchCityState
@@ -34,6 +40,11 @@ for city in citiState:
     glassdoor.formulateURLfromGoogleSearch(baseUrl)
 
 print("Glassdoor Process Completed....")
+
+conn = dbCon.OpenDBConnection()
+dbCon.truncateData(conn, "monsterjobs")
+dbCon.closeDBConnection
+
 
 for city in citiState:
     searchCityState = urllib.parse.quote(city)
