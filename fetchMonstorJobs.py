@@ -16,7 +16,6 @@
 
 import requests
 import bs4
-import re
 import dbConnection as dbCon
 
 def extractData(url):
@@ -35,13 +34,12 @@ def extractData(url):
         location = job.find('div', class_="summary").find('div', class_="location").text
         postedOn = job.find('div', class_="meta flex-col").find('time').text
 
-        myList.append(jobName.replace("\n","").replace("\r",""))
         myList.append(company.replace("\n","").replace("\r",""))
+        myList.append(jobName.replace("\n","").replace("\r",""))
         myList.append(location.replace("\n","").replace("\r",""))
         #Since there is no salary available, defaulting it to 0
         myList.append(0)
-        myList.append(postedOn.replace("\n","").replace("\r",""))    
-        
+        myList.append(postedOn.replace("\n","").replace("\r",""))            
         # print(myList)
         dbCon.insertData(connection, myList, "monsterjobs")
         

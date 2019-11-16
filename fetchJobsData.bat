@@ -1,0 +1,1 @@
+python.exe etlPrjMain.py >> log.txt 2>&1
